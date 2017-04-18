@@ -1,0 +1,554 @@
+<html><head></head><body><div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a href="https://github.com/Planeshifter/text-miner#readme">text-miner (v1.0.5)</a>
+</h1>
+<h4>text mining utilities</h4>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.text-miner">module text-miner</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.text-miner.Corpus">
+            function <span class="apidocSignatureSpan">text-miner.</span>Corpus
+            <span class="apidocSignatureSpan">( docs )</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.text-miner.Terms">
+            function <span class="apidocSignatureSpan">text-miner.</span>Terms
+            <span class="apidocSignatureSpan">( corpus )</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.text-miner.weightTfIdf">
+            function <span class="apidocSignatureSpan">text-miner.</span>weightTfIdf
+            <span class="apidocSignatureSpan">( dtm )</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <span class="apidocSignatureSpan">object <span class="apidocSignatureSpan">text-miner.</span>STOPWORDS</span>
+
+        </li>
+
+        <li>
+
+            <span class="apidocSignatureSpan">object <span class="apidocSignatureSpan">text-miner.</span>contractions</span>
+
+        </li>
+
+        <li>
+
+            <span class="apidocSignatureSpan">object <span class="apidocSignatureSpan">text-miner.</span>utils</span>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.text-miner.utils">module text-miner.utils</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.text-miner.utils.expandContractions">
+            function <span class="apidocSignatureSpan">text-miner.utils.</span>expandContractions
+            <span class="apidocSignatureSpan">( str )</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.text-miner" id="apidoc.module.text-miner">module text-miner</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.text-miner.Corpus" id="apidoc.element.text-miner.Corpus">
+        function <span class="apidocSignatureSpan">text-miner.</span>Corpus
+        <span class="apidocSignatureSpan">( docs )</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function Corpus( docs ) {
+
+	// load natural module
+	if ( !natural ) {
+		natural = require( 'natural' );
+	}
+
+	// if nothing passed, treat docs as empty array
+	if ( docs === undefined ) {
+		docs = [];
+	}
+
+	if ( !( this instanceof Corpus ) ) {
+		return new Corpus(docs);
+	}
+
+	var self = this;
+
+	if ( typeof docs === "string" ) {
+		docs = new Array(docs);
+		this.documents = docs;
+	} else if ( Array.isArray(docs) === true &amp;&amp; docs.every( function(doc){
+		return typeof doc === "string";} ) ) {
+		this.documents = docs;
+	} else {
+		throw new TypeError("Constructor expects array of documents");
+	}
+
+	// hold meta information for documents
+	this.meta = [];
+
+	// adds new document to Corpus
+	this.addDoc = function addDoc( doc ) {
+		if (typeof doc === "string"){
+			self.documents.push(doc);
+		}
+		else {
+			throw new TypeError("Argument has to be a string");
+		}
+	};
+
+	this.addDocs = function addDocs( docs ) {
+		if (Array.isArray(docs) === true &amp;&amp; docs.every(function(doc){
+			return typeof doc === "string";
+		})){
+			self.documents = self.documents.concat(docs);
+		} else {
+			throw new TypeError("Parameter expects an array of strings");
+		}
+	};
+
+	// strips extra whitespace from docs
+	this.clean = function clean() {
+		self.documents = self.documents.map(function(doc){
+			return _.clean(doc);
+		});
+		return self;
+	};
+
+	this.trim = function trim() {
+		self.documents = this.documents.map(function(doc){
+			return _.trim(doc);
+		});
+		return self;
+	};
+
+	this.inspect = function inspect( truncLength ) {
+		if ( truncLength === undefined ){
+			truncLength = 200;
+		}
+		truncLength = 200;
+		self.documents.forEach( function( doc, index ) {
+			console.log("Document " + index + ":");
+			console.log( _(doc).truncate( truncLength ) );
+			console.log("\u2500 \u2500 \u2500 \u2500 \u2500");
+		});
+	};
+
+	this.toLower = function toLower() {
+		self.documents = self.documents.map(function(doc){
+			return doc.toLowerCase();
+		});
+		return self;
+	};
+
+	this.toUpper = function toUpper() {
+		self.documents = self.documents.map(function(doc){
+			return doc.toUpperCase();
+		});
+		return self;
+	};
+
+	this.stem = function stem( type ) {
+		self.documents = self.documents.map(function(doc){
+			if( type === "Lancaster" ) {
+				return natural.LancasterStemmer.stem(doc);
+			} else {
+				return natural.PorterStemmer.stem(doc);
+			}
+		});
+		return self;
+	};
+
+	this.map = function map( FUN ) {
+		self.documents = this.documents.map(FUN);
+		return self;
+	};
+
+	this.removeWords = function removeWords( words, case_insensitive ) {
+		for ( var doc = 0; doc &lt; self.documents.length; doc++ ) {
+			for ( var i = 0; i &lt; words.length; i++ ) {
+				var options = case_insensitive ? "gi" : "g";
+				var myRegExp = new RegExp( "\\b" + words[i] + "\\b", options );
+				self.documents[doc] = self.documents[doc].replace( myRegExp,"" );
+			}
+		}
+		// Clean the newly created extra whitespace...
+		self.clean();
+		return self;
+	};
+
+	this.removeInterpunctuation = function removeInterpunctuation() {
+		self.documents = self.documents.map(function(doc){
+			return doc.replace(/[\!\?\.,;-]/g, " ");
+		});
+		return self;
+	};
+
+	this.removeNewlines = function removeNewlines() {
+		self.documents = self.documents.map(function(doc){
+			return doc.replace(/\r?\n|\r/g, " ");
+		});
+		return self;
+	};
+
+	this.removeDigits = function removeDigits() {
+		self.documents = self.documents.map(function(doc){
+			return doc.replace(/\d/g,"");
+		});
+		return self;
+	};
+
+	this.removeInvalidCharacters = function removeInvalidCharacters() {
+		self.documents = self.documents.map(function(doc){
+			return doc.replace(/\uFFFD/g, '');
+		});
+		return self;
+	};
+
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+The fundamental data type in the `text-miner` module is the *Corpus*. An instance of this class wraps a collection of documents
+and provides several methods to interact with this collection and perform post-processing tasks such as stemming,
+stopword removal etc.
+
+A new corpus is created by calling the constructor
+
+```
+var my_corpus = new tm.<span class="apidocCodeKeywordSpan">Corpus</span>([]);
+```
+
+where `[]` is an array of text documents which form the data of the corpus. The class supports method chaining, such that mutliple
+ methods can be invoked after each other, e.g.
+
+```
+my_corpus
+	.trim()
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.text-miner.Terms" id="apidoc.element.text-miner.Terms">
+        function <span class="apidocSignatureSpan">text-miner.</span>Terms
+        <span class="apidocSignatureSpan">( corpus )</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function Terms( corpus ) {
+
+	if( !( this instanceof Terms ) ) {
+		return new Terms(corpus);
+	}
+
+	var self = this;
+
+	this.vocabulary = [];
+	this.dtm = [];
+
+	Object.defineProperty( this, "nDocs", {
+		get: function() {
+			return this.dtm.length;
+		},
+		enumerable: true
+	});
+
+	Object.defineProperty( this, "nTerms", {
+		get: function() {
+			return this.vocabulary.length;
+		},
+		enumerable: true
+	});
+
+	this.fill_zeros = function() {
+		for ( var doc = 0; doc &lt; self.dtm.length; doc++ ) {
+			for ( var word = 0; word &lt; self.dtm[0].length; word++ ) {
+				if ( self.dtm[doc][word] === undefined ) {
+					self.dtm[doc][word] = 0;
+				}
+			}
+		}
+		return self;
+	};
+
+	function _processDoc( doc ) {
+
+		var wordArray = doc.split( ' ' );
+		var words = [];
+
+		for ( var i = 0; i &lt; wordArray.length; i++ ){
+			var current_word = wordArray[i];
+			var index = self.vocabulary.indexOf( current_word );
+
+			if ( index &gt; -1 ) {
+					words[index] = words[index] + 1 || 1;
+			} else {
+					words[self.vocabulary.length] = 1;
+					self.vocabulary.push( current_word );
+			}
+		}
+		self.dtm.push(words);
+	}
+
+	function _wordFreq( wordIndex ) {
+		var mapping = self.dtm.map( function( doc ) {
+			return doc[wordIndex] || 0;
+		});
+		var reducing = mapping.reduce( function( a, b ) {
+			return a + b;
+		});
+		return reducing;
+	}
+
+	this.findFreqTerms = function( n ) {
+		var wordArray = [];
+		for ( var w = 0; w &lt; self.vocabulary.length; w++ ) {
+			var wordCount = _wordFreq(w);
+			var obj = {};
+			obj.word = self.vocabulary[w];
+			obj.count = wordCount;
+			if ( wordCount &gt;= n ) {
+				wordArray.push(obj);
+			}
+		}
+
+		var sortedWordArray = _.sortBy( wordArray, function( obj ) {
+			return obj.word;
+		});
+		return sortedWordArray;
+	};
+
+	this.removeSparseTerms = function( percent ) {
+
+		var flaggedForKeeping = [];
+		for ( var w = 0; w &lt; self.vocabulary.length; w++ ) {
+			var counter = 0;
+			for ( var d = 0; d &lt; self.dtm.length; d++ ){
+				var doc = self.dtm[d];
+				if ( doc !== undefined &amp;&amp; doc[w] !== undefined ) {
+					counter++;
+				}
+			}
+			if ( counter / self.dtm.length &gt;= percent ) {
+				flaggedForKeeping.push(w);
+			}
+		}
+
+		var newVocabulary = [];
+		for ( var i = 0; i &lt; flaggedForKeeping.length; i++ ) {
+			newVocabulary.push( self.vocabulary[ flaggedForKeeping[i] ] );
+		}
+
+		for ( var d2 = 0; d2 &lt; self.dtm.length; d2++ ) {
+			var newVec = [];
+			for ( var j = 0; j &lt; flaggedForKeeping.length; j++ ) {
+				newVec.push( self.dtm[d2][ flaggedForKeeping[j] ] );
+			}
+			self.dtm[d2] = newVec;
+		}
+
+		self.vocabulary = newVocabulary;
+		return self;
+	};
+
+	this.weighting = function( fun ) {
+		self.dtm = fun(self.dtm);
+		return self;
+	};
+
+	// initialization
+	this.init = function( documents ) {
+		var i;
+
+		for ( i = 0; i &lt; documents.length; i++ ) {
+			_processDoc( documents[i] );
+		}
+
+		for ( i = 0; i &lt; self.dtm.length; i++ ) {
+			var doc = self.dtm[i];
+			doc.length = self.vocabulary.length; // ensure that all rows in dtm have same length
+		}
+
+	};
+	self.init( corpus.documents );
+
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+Strips off whitespace at the beginning and end of each document.
+
+## Terms
+
+We can pass a corpus to the constructor `Terms` in order to create a term-document-matrix
+
+```
+var terms = new tm.<span class="apidocCodeKeywordSpan">Terms</span>(my_corpus);
+```
+
+An instance of `Terms` has the following properties:
+
+### Properties
+
+#### `.vocabulary`
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.text-miner.weightTfIdf" id="apidoc.element.text-miner.weightTfIdf">
+        function <span class="apidocSignatureSpan">text-miner.</span>weightTfIdf
+        <span class="apidocSignatureSpan">( dtm )</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function weightTfIdf( dtm ) {
+	var word_doc_freq = [];
+	for ( var w = 0; w &lt; dtm[0].length; w++ ) {
+		var count = 0;
+		for ( var d = 0; d &lt; dtm.length; d++ ) {
+			if ( dtm[d][w] !== undefined ) {
+				count++;
+			}
+		}
+		word_doc_freq.push( count );
+	}
+	for ( var doc = 0; doc &lt; dtm.length; doc++ ) {
+		for ( var word = 0; word &lt; dtm[0].length; word++ ){
+			var idf = Math.log( dtm.length ) - Math.log( 1 + word_doc_freq[word] );
+			if ( dtm[doc][word] !== undefined ) {
+				dtm[doc][word] = dtm[doc][word] * idf;
+			}
+		}
+	}
+	return dtm;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+
+
+
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.text-miner.utils" id="apidoc.module.text-miner.utils">module text-miner.utils</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.text-miner.utils.expandContractions" id="apidoc.element.text-miner.utils.expandContractions">
+        function <span class="apidocSignatureSpan">text-miner.utils.</span>expandContractions
+        <span class="apidocSignatureSpan">( str )</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function expandContractions( str ) {
+	for ( var key in CONTRACTIONS ) {
+		str = str.replace( new RegExp(key,"gi"), CONTRACTIONS[key][0] );
+	}
+	return str;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+Turn the document-term matrix `dtm` into a non-sparse matrix by replacing each value which is `undefined` by zero and save the result
+.
+
+## Utils
+
+Namespace object which bundles several other utility functions.
+
+### `.<span class="apidocCodeKeywordSpan">expandContractions</span>(str)`
+
+Replaces all occuring English contractions by their expanded equivalents, e.g. "don't" is changed to
+"do not". The resulting string is returned.
+
+## Unit Tests
+
+Run tests via the command `npm test`
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
+</body></html>
