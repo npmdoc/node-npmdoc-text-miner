@@ -1,6 +1,6 @@
 # npmdoc-text-miner
 
-#### api documentation for  [text-miner (v1.0.5)](https://github.com/Planeshifter/text-miner#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-text-miner.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-text-miner) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-text-miner.svg)](https://travis-ci.org/npmdoc/node-npmdoc-text-miner)
+#### basic api documentation for  [text-miner (v1.0.5)](https://github.com/Planeshifter/text-miner#readme)  [![npm package](https://img.shields.io/npm/v/npmdoc-text-miner.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-text-miner) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-text-miner.svg)](https://travis-ci.org/npmdoc/node-npmdoc-text-miner)
 
 #### text mining utilities
 
@@ -74,7 +74,8 @@
         "test": "mocha",
         "test-cov": "istanbul cover ./node_modules/.bin/_mocha --dir ./reports/coverage -- -R spec"
     },
-    "version": "1.0.5"
+    "version": "1.0.5",
+    "bin": {}
 }
 ```
 
